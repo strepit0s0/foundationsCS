@@ -1,0 +1,81 @@
+import time
+import tweepy
+from tweepy import OAuthHandler
+from tweepy.streaming import StreamListener
+from tweepy import Stream
+import kafka
+import json
+import re
+from kafka import KafkaProducer
+
+
+
+consumer_key="34cY1IqzPmg782UCXyR5sa0Dk"
+consumer_secret="82924O6MzqZg5aYakLjSwGJXaitsSbaNV2EMqXrrWrGXAbFz6Y"
+access_token="232265070-nRgGJq6tkqSoSARMMyWuiGFgesHvePWoQN3aB5nQ"
+access_token_secret="EVVpcmDZPsl3OnIwhj15ZofcT8KJn9q0zHxxLIGbSIGrn"
+
+
+auth = OAuthHandler(consumer_key, consumer_secret)
+auth.set_access_token(access_token, access_token_secret)
+api = tweepy.API(auth)
+
+producer = KafkaProducer(bootstrap_servers='sandbox.hortonworks.com:6667')
+
+class Listener(tweepy.StreamListener):
+        def on_status(self, status):
+                if status.coordinates is not None :
+                        tweet = {"author": status.user.name, "ora" : status.created_at.strftime("%Y-%m-%d %H:%M:%S"), "coords": status.coordinates['coordinates'] }
+                        data_to_kafka = json.dumps(tweet).encode('utf-8')
+                        print(data_to_kafka)
+                        if status.coordinates["coordinates"][1]> 36.3717344344  and status.coordinates["coordinates"][1]< 42.9081372405:
+                                if status.coordinates["coordinates"][0]> -5.7234908299  and status.coordinates["coordinates"][0] < 2.8985666079:
+                                        if status.user.lang == "en":
+                                                producer.send("spagnaen1",data_to_kafka)
+                                        elif status.user.lang == "jap":
+                                                producer.send("spagnajap1",data_to_kafka)
+                                        else:
+                                                producer.send("spagnaes1",data_to_kafka)
+                        elif status.coordinates["coordinates"][1]> 43.2160061897  and status.coordinates["coordinates"][1]< 49.3648656683:
+                                if status.coordinates["coordinates"][0]> -0.0419706609 and status.coordinates["coordinates"][0] < 7.5027863676:
+                                        if status.user.lang == "en":
+                                                producer.send("franciaen1",data_to_kafka)
+                                        elif status.user.lang == "jap":
+                                                producer.send("franciajap1",data_to_kafka)
+                                        else:
+                                                producer.send("franciaes1",data_to_kafka)
+                        elif status.coordinates["coordinates"][1]> 47.2982950435  and status.coordinates["coordinates"][1]< 54.9039819757:
+                                if status.coordinates["coordinates"][0]> 5.0770049095  and status.coordinates["coordinates"][0] < 15.0403900146:
+                                        if status.user.lang== "en":
+                                                producer.send("germaniaen1",data_to_kafka)
+                                        elif status.user.lang== "jap":
+                                                producer.send("germaniajap1",data_to_kafka)
+                                        else:
+                                                producer.send("germaniaes1",data_to_kafka)
+                        elif status.coordinates["coordinates"][1]> 51.5248285647  and status.coordinates["coordinates"][1]< 57.10256028950981:
+                                if status.coordinates["coordinates"][0]> -9.6710546319 and status.coordinates["coordinates"][0] < -3.1671644751880876:
+                                        if status.user.lang== "en":
+                                                producer.send("ingen1",data_to_kafka)
+                                        elif status.user.lang== "jap":
+                                                producer.send("ingjap1",data_to_kafka)
+                                        else:
+                                                producer.send("inges1",data_to_kafka)
+                        elif status.coordinates["coordinates"][1]> 35.5086217  and status.coordinates["coordinates"][1]< 47.0833333:
+                                if status.coordinates["coordinates"][0]> 12.5929200 and status.coordinates["coordinates"][0] < 12.1833332:
+                                        if status.user.lang== "en":
+                                                producer.send("italiaen1",data_to_kafka)
+                                        elif status.user.lang== "jap":
+                                                producer.send("italiajap1",data_to_kafka)
+                                        else:
+                                                producer.send("italiaes1",data_to_kafka)
+                        else:
+                                pass
+                else:
+                        pass
+
+
+stream = Listener
+stream = Stream(auth = api.auth, listener=stream())
+stream.filter(languages=["en","jap","es"] ,locations=[-180,-90,180,90], async=True)
+
+
