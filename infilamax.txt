@@ -1,0 +1,90 @@
+import json
+import time
+import pymongo as mongo
+from kafka import KafkaConsumer
+
+client = mongo.MongoClient()
+
+db = client.vacca
+
+con1 = KafkaConsumer(bootstrap_servers='sandbox.hortonworks.com:6667',auto_offset_reset='earliest',consumer_timeout_ms=1000)
+con2 = KafkaConsumer(bootstrap_servers='sandbox.hortonworks.com:6667',auto_offset_reset='earliest',consumer_timeout_ms=1000)
+con3 = KafkaConsumer(bootstrap_servers='sandbox.hortonworks.com:6667',auto_offset_reset='earliest',consumer_timeout_ms=1000)
+con4 = KafkaConsumer(bootstrap_servers='sandbox.hortonworks.com:6667',auto_offset_reset='earliest',consumer_timeout_ms=1000)
+con5 = KafkaConsumer(bootstrap_servers='sandbox.hortonworks.com:6667',auto_offset_reset='earliest',consumer_timeout_ms=1000)
+con6 = KafkaConsumer(bootstrap_servers='sandbox.hortonworks.com:6667',auto_offset_reset='earliest',consumer_timeout_ms=1000)
+con7 = KafkaConsumer(bootstrap_servers='sandbox.hortonworks.com:6667',auto_offset_reset='earliest',consumer_timeout_ms=1000)
+con8 = KafkaConsumer(bootstrap_servers='sandbox.hortonworks.com:6667',auto_offset_reset='earliest',consumer_timeout_ms=1000)
+con9 = KafkaConsumer(bootstrap_servers='sandbox.hortonworks.com:6667',auto_offset_reset='earliest',consumer_timeout_ms=1000)
+con10 = KafkaConsumer(bootstrap_servers='sandbox.hortonworks.com:6667',auto_offset_reset='earliest',consumer_timeout_ms=1000)
+con11 = KafkaConsumer(bootstrap_servers='sandbox.hortonworks.com:6667',auto_offset_reset='earliest',consumer_timeout_ms=1000)
+con12 = KafkaConsumer(bootstrap_servers='sandbox.hortonworks.com:6667',auto_offset_reset='earliest',consumer_timeout_ms=1000)
+con13 = KafkaConsumer(bootstrap_servers='sandbox.hortonworks.com:6667',auto_offset_reset='earliest',consumer_timeout_ms=1000)
+con14 = KafkaConsumer(bootstrap_servers='sandbox.hortonworks.com:6667',auto_offset_reset='earliest',consumer_timeout_ms=1000)
+con15 = KafkaConsumer(bootstrap_servers='sandbox.hortonworks.com:6667',auto_offset_reset='earliest',consumer_timeout_ms=1000)
+
+
+
+con1.subscribe(['spagnaen1'])
+con2.subscribe(['spagnajap1'])
+con3.subscribe(['spagnaes1'])
+con4.subscribe(['germaniaen1'])
+con5.subscribe(['germaniajap1'])
+con6.subscribe(['germaniaes1'])
+con7.subscribe(['ingen1'])
+con8.subscribe(['ingjap1'])
+con9.subscribe(['inges1'])
+con10.subscribe(['italiaen1'])
+con11.subscribe(['italiajap1'])
+con12.subscribe(['italiaes1'])
+con13.subscribe(['franciaen1'])
+con14.subscribe(['franciajap1'])
+con15.subscribe(['franciaes1'])
+
+
+spagnaen = db.spagnaen
+spagnajap = db.spagnajap
+spagnaes = db.spagnaes
+germaniaen = db.germaniaen
+germaniaes = db.germaniaes
+germaniajap = db.germaniajap
+ingen = db.ingen
+ingjap = db.ingjap
+inges = db.ingen
+franciaen = db.franciaen
+franciajap = db.franciajap
+franciaes = db.franciaes
+italiaen = db.italiaen
+italiajap = db.italiajap
+italiaes = db.italiaes
+
+
+
+cons_coll=[(con1,spagnaen),(con2,spagnajap),(con3,spagnaes),(con4,germaniaen),(con5,germaniaes),(con6,germaniajap),(con7,ingen),(con8,ingjap),(con9,inges),
+           (con10,franciaen),(con11,franciajap),(con12,franciaes),(con13,italiaen),(con14,italiajap),(con15,italiaes)]
+
+
+from CSV_TO_DICT import germany_list ,italy_list ,gb_list ,france_list
+
+
+germany_monument = db.germany_monument #creazione collezione
+germany_monument.insert_many(germany_list) #insert document
+
+italy_monument = db.italy_monument #creazione collezione
+italy_monument.insert_many(italy_list) #insert document
+
+#spain_monument = db.spain_monument #creazione collezione
+#spain_monument.insert_many(spain_list) #insert document
+
+france_monument = db.france_monument #creazione collezione
+france_monument.insert_many(france_list) #insert document
+
+great_britain_monument = db.great_britain_monument #creazione collezione
+great_britain_monument.insert_many(gb_list) #insert document
+
+
+for message  in cons_coll:
+        for i in message[0]:
+                tweet = json.loads(i.value.decode('utf-8'))
+                message[1].insert_one(tweet)
+time.sleep(5)
